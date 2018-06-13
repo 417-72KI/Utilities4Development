@@ -14,7 +14,12 @@ def main(args):
         output = create_directory(output)
     bundle_id = args.bundle_id
     for mode in modes:
-        data = createExportOptions(bundle_id, mode)
+        print("Input Provisioning Profile name:")
+        provisioning_profile = input()
+        if provisioning_profile == '':
+            print("Nothing input. You must edit created plists after creating Provisioning Profile.")
+            provisioning_profile = None
+        data = createExportOptions(mode, bundle_id, provisioning_profile)
         outputDir = os.path.abspath(output)
         outputFile = "{}/{}.plist".format(outputDir, mode)
         try:
@@ -23,8 +28,9 @@ def main(args):
             print('Error: {}'.format(e))
         else:
             print("output: {}".format(outputFile))
+        print()
 
-def createExportOptions(bundle_id, mode):
+def createExportOptions(mode, bundle_id, provisioning_profile):
     if mode == modes[0]:
         data = {'method': 'development', 'uploadSymbols': True}
     elif mode == modes[1]:
@@ -33,7 +39,7 @@ def createExportOptions(bundle_id, mode):
         data = {'method': 'app-store', 'uploadBitcode': True}
     else:
         exit(1)
-    data['provisioningProfiles'] = {bundle_id: 'TODO: Input Provisioning Profile'}
+    data['provisioningProfiles'] = {bundle_id: provisioning_profile or 'TODO: Input Provisioning Profile'}
     return data
 
 def create_directory(output):
