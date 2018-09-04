@@ -4,7 +4,7 @@ require 'yaml'
 require 'optparse'
 require 'pp'
 
-def prepare_test(skip_before_script)
+def prepare_test(skip_before_script, print_compiled_command)
     yaml = load_gitlab_ci()
     jobs = get_job_list(yaml)
 
@@ -17,14 +17,14 @@ def prepare_test(skip_before_script)
             print("start test for job '#{key}'\n")
             variables = yaml["variables"]
             job = jobs[key]
-            start_test(job, variables, skip_before_script)
+            start_test(job, variables, skip_before_script, print_compiled_command)
             break
         end
         print("Invalid input.\n")
     end
 end
 
-def start_test(job, variables, skip_before_script)
+def start_test(job, variables, skip_before_script, print_compiled_command)
     set_environments(variables)
 
     before_script = skip_before_script ? nil : job['before_script']
@@ -41,14 +41,16 @@ def start_test(job, variables, skip_before_script)
     if after_script
         scripts.concat(after_script)
     end
-    scripts.each { |cmd| run_script(cmd) }
+    scripts.each { |cmd| run_script(cmd, print_compiled_command) }
 end
 
-def run_script(script)
+def run_script(script, print_compiled_command)
     print(script)
     print("\n")
-    system("echo \"#{script}\"")
-    print("\n")
+    if print_compiled_command
+        system("echo \"#{script}\"")
+        print("\n")
+    end
     system(script)
 end
 
@@ -73,9 +75,12 @@ def load_gitlab_ci()
 end
 
 def set_environments(environments)
+    if environments.nil?
+        return
+    end
     environments.each { |key, value|
         # cmd = "export #{key}=\"#{value}\""
-        # system("echo #{cmd}")
+        # system(cmd)
         ENV[key] = value
     }
 end
@@ -111,7 +116,7 @@ def main(args)
         if args['skip_before_script']
             skip_before_script = args['skip_before_script']
         end
-        prepare_test(skip_before_script)
+        prepare_test(skip_before_script, args['print_compiled_command'])
     end
 end
 
@@ -120,6 +125,7 @@ if __FILE__ == $0
     opt = OptionParser.new
     opt.on('-s secret_variables', Array, 'Secret Variables set in GitLab-CI') { |v| args['secret_variables'] = v }
     opt.on('-b', '--skip-before-script', 'If before_script is not necessary to be executed many times, it skips before_script.') { |v| args['skip_before_script'] = true }
+    opt.on('-c', '--print-compiled-command') { |v| args['print_compiled_command'] = true }
     opt.on('-p', '--print-gitlab_ci') { |v| args['mode'] = 'p' }
     opt.on('-l', '--list-jobs') { |v| args['mode'] = 'l' }
     opt.parse(ARGV)
