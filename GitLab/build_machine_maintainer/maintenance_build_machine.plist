@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>maintenance_build_machine</string>
+	<key>UserName</key>
+	<string>build</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/usr/local/bin/maintenance_build_machine</string>
+	</array>
+	<key>StartCalendarInterval</key>
+	<array>
+		<dict>
+			<key>Hour</key>
+			<integer>4</integer>
+			<key>Minute</key>
+			<integer>0</integer>
+		</dict>
+	</array>
+	<key>StandardOutPath</key>
+	<string>/usr/local/var/log/maintenance_build_machine.log</string>
+	<key>StandardErrorPath</key>
+	<string>/usr/local/var/log/maintenance_build_machine_error.log</string>
+</dict>
+</plist>
